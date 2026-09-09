@@ -66,7 +66,7 @@ for f in colors.toml icons.theme neovim.lua vscode.json unlock.png preview.png; 
     echo "Installed theme/$f -> $THEME_DIR/$f"
   fi
 done
-for f in "$SCRIPT_DIR"/theme/backgrounds/*.png; do
+for f in "$SCRIPT_DIR"/theme/backgrounds/*.jpg; do
   base=$(basename "$f")
   if [[ -f "$BACKGROUNDS_DIR/$base" ]]; then
     echo "Existing $BACKGROUNDS_DIR/$base found — leaving it as-is."

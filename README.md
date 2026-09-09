@@ -87,7 +87,7 @@ omarchy-theme-bg-next
 | File | What it does |
 |---|---|
 | `theme/colors.toml` | Core palette — every other file below derives from this |
-| `theme/backgrounds/*.png` | The two wallpapers |
+| `theme/backgrounds/*.jpg` | The two wallpapers |
 | `theme/icons.theme` | Points GTK apps (Nautilus) at `BeautyLine-Fallout` |
 | `theme/neovim.lua` | LazyVim colorscheme spec |
 | `theme/vscode.json` | VS Code/VSCodium/Cursor extension + theme name |
