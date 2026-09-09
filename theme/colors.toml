@@ -1,0 +1,49 @@
+# ============================================================================
+# FILE:    theme/colors.toml
+# TASK:    Omarchy Fallout theme — core color palette (every other themed
+#          app/tool in Omarchy templates directly off this file).
+# STATUS:  DONE
+# OWNER:   agent A 2026-09-09
+#
+# WHAT THIS FILE DOES:
+#   Wasteland/power-armor palette: dusty rust-brown darks, warm parchment
+#   foreground, amber/rust accent (#D9822B family) — deliberately NOT
+#   Pip-Boy green or Brotherhood-of-Steel red, per explicit user direction.
+#   ANSI colors are tinted toward the same wasteland family (olive drab,
+#   faded steel, weathered patina) while staying distinguishable from each
+#   other for real terminal use.
+#
+# NEXT STEP (if not DONE):
+#   none — file complete
+# ============================================================================
+mode = "dark"
+
+accent = "#D9822B"
+selection = "#3A2416"
+muted = "#7A6552"
+
+background = "#0D0A07"
+dark_background = "#080604"
+darker_background = "#050403"
+lighter_background = "#1A140D"
+
+foreground = "#E8C99A"
+dark_foreground = "#B8874F"
+light_foreground = "#F2DDB0"
+bright_foreground = "#FFEAC2"
+
+red = "#C0392B"
+yellow = "#D4A017"
+orange = "#D9822B"
+green = "#8A9A5B"
+cyan = "#5E8C8A"
+blue = "#5A7D8C"
+magenta = "#8C6B8F"
+brown = "#6B4A2F"
+
+bright_red = "#E0574A"
+bright_yellow = "#F0C13D"
+bright_green = "#AEC17F"
+bright_cyan = "#7FB0AD"
+bright_blue = "#7DA3B3"
+bright_magenta = "#B08CB3"
