@@ -10,7 +10,7 @@
 #
 # WHAT THIS DOES, in order:
 #   1. Check dependencies (python3, Pillow — needed only for the optional
-#      icon-generation step; the wallpapers themselves are static PNGs
+#      icon-generation step; the wallpapers themselves are static images
 #      shipped in the repo, no live rendering needed, unlike the Matrix
 #      theme's animated wallpaper).
 #   2. Create ~/.config/omarchy/themes/fallout/ and install
@@ -113,8 +113,8 @@ If the Fallout theme isn't already selected:
     omarchy-theme-set fallout
   or pick "Fallout" from the Omarchy theme menu.
 
-Two wallpapers are included (Dusk / Dust Storm) — flip between them with the
-standard Omarchy background switcher:
+Four wallpapers are included (power-armor-dogmeat is the default) — flip
+between them with the standard Omarchy background switcher:
     SUPER CTRL + SPACE
 or:
     omarchy-theme-bg-next
