@@ -7,103 +7,97 @@
 # OWNER:   agent A 2026-09-09
 #
 # WHAT THIS FILE DOES:
-#   Takes the Matrix theme's preview.png (a real desktop screenshot of the
-#   themed desktop — Neovim+Neo-tree, a terminal running ls, btop, Nautilus —
-#   which the script's own repo built interactively per the recipe in
-#   omarchy-matrix-rain's generate_matrix_preview.py header) and remaps its
-#   color family from matrix-green to fallout amber/rust. The desktop scene
-#   and window layout are shared between the two themes (same base apps, same
-#   2x2 tiling); only the colors differ. NOT called by install.sh — preview.png
-#   is a fixed, curated asset shipped in the repo (same as every stock Omarchy
-#   theme). Re-run by hand only if the matrix preview or the palette changes.
+#   Crops/scales/quantizes a RAW desktop screenshot (grim capture, typically
+#   1920x1080) down to the standard Omarchy preview size 1800x1012, 256-color
+#   palette. That is the FINAL step of building theme/preview.png — the scene
+#   setup and capture are interactive/compositor work documented in the
+#   recipe below and must be done BY HAND first (mirrors how every stock
+#   theme's preview.png and omarchy-matrix-rain's generate_matrix_preview.py
+#   work). NOT called by install.sh — preview.png is a fixed, curated asset
+#   shipped in the repo. Re-run by hand only to regenerate after a
+#   colors/icon/wallpaper change makes the shipped preview stale.
 #
-#   What it does NOT do: it does not set up the desktop scene or capture a
-#   screenshot (that's matrix's preview recipe, one-time interactive work —
-#   see matrix's generate_matrix_preview.py header). To build the fallout
-#   preview from an actual fallout-themed rebuild of that same scene instead
-#   of a hue-shift, re-shoot the scene with the fallout theme applied and use
-#   the quantity of that raw screenshot in place of --source.
+#   HISTORY: the very first version described a hue-shift of the Matrix
+#   theme's preview (rotate matrix-green -> fallout amber) as a quick interim
+#   preview. That approach was fully superseded ONCE the real desktop scene
+#   could be built with the fallout theme applied live (amber nvim palette,
+#   BeautyLine-Fallout home-folder icons, official-art wallpapers).
+#   Hue-shifting shipped one image and is no longer used.
 #
 # NEXT STEP (if not DONE):
 #   none — file complete
 # ============================================================================
 #
-# Color mapping:
-#   Matrix greens all sit at hue ~0.36 (measured from the live matrix
-#   preview). Fallout amber lives at hue ~0.08 (#D9822B family). So the
-#   whole green ramp is rotated by -0.28 in hue space, saturation is boosted
-#   ~15% (amber reads more vibrant at the same value than matrix green did),
-#   and value/brightness is left untouched so the synthetic shading the
-#   screenshot already has stays intact. Pixels that aren't green (black
-#   desktop, gray UI chrome, purple nvim floating-window background, actual
-#   magenta/blue syntax tokens) pass through unchanged.
-#
-# Green detection predicate (per-pixel):
-#   saturation > 0.10 AND green channel dominates red AND
-#   hue in [0.15, 0.50] AND value > 0.03
-#   (the value floor keeps pure-black room for the true "black" most of the
-#   matrix desktop already is — verified it maps 198K green pixels and leaves
-#   1623K others untouched.)
-#
-# Output is quantized to a 256-color palette (MAXCOVERAGE) like the stock
-# matrix/other-theme previews, keeping the file a few hundred KB, in line with
-# what omarchy-theme-switcher expects to load at thumbnail size.
+# RECIPE for producing --source (the fallout preview's final shot):
+#   1. Ensure the fallout theme is live everywhere it matters: `omarchy theme
+#      current` -> Fallout, and the nvim palette is amber via the repo's
+#      theme/neovim.lua (aether-from-colors.toml — NOT shawilly/fallout.nvim,
+#      which is Pip-Boy green). Generate+apply the folder icon set first so
+#      the home folder shows themed icons:
+#        python3 generate_fallout_icons.py
+#        gsettings set org.gnome.desktop.interface icon-theme 'BeautyLine-Fallout'
+#   2. Set the monitor to 1920x1080 (matches 1800x1012 aspect so the final
+#      crop is near-zero):
+#        hyprctl eval 'hl.monitor({ output = "<name>", mode = "1920x1080@60",
+#                                   position = "0x0", scale = 1 })'
+#   3. Make the compositor auto-hide the cursor for the capture (prevents the
+#      mouse showing up in the shot AND prevents hover highlights):
+#        hyprctl eval 'hl.config({ cursor = { inactive_timeout = 1000 } })'
+#      then STOP moving the mouse ~4s before grim. Reset to 0 after.
+#   4. Park any background windows OUT of the shot. On this Hyprland fork
+#      `hl.dsp.workspace.move` no-ops (can't "move to desktop 2" — empty
+#      workspaces don't exist and hl.dsp.workspace.change_id has a phantom
+#      arg bug), so float the window then move it fully off-screen instead:
+#        hyprctl eval 'hl.dispatch(hl.dsp.focus({window="class:^(...)$"}))'
+#        hyprctl eval 'hl.dispatch(hl.dsp.window.float({}))'
+#        hyprctl eval 'hl.dispatch(hl.dsp.window.move({x=2200,y=100}))'
+#   5. Open + float + position 4 windows (all fully detached so shells return:
+#      `setsid bash -c '...' >/dev/null 2>&1 </dev/null &`):
+#        - top-left    (8,42)    992x818  — foot: nvim with 2 tabs + Neo-tree
+#          (cd /usr/lib/python3.14 && foot --app-id nvim-preview nvim glob.py
+#            -c "78" -c "normal! zz" -c "Neotree toggle"
+#            -c "tabnew /usr/lib/python3.14/statistics.py" -c "tabfirst")
+#        - bottom-left (8,868)   992x204  — foot: ls -la; exec $SHELL
+#        - top-right  (1008,42)  904x658  — foot: btop (let graphs populate)
+#        - bottom-right (1008,708) 904x364 — nautilus --new-window "$HOME"
+#          (HOME folder is deliberate: shows the theme's folder icons)
+#      Targeting gotcha on this fork: focus BY APP-CLASS fails for windows that
+#      lack an app_id (btop), so focus by ADDRESS — read each window's address
+#      from `hyprctl clients -j`, then for each: focus({window="address:<hex>"})
+#      then window.float({}) / .resize({x=W,y=H}) / .move({x=X,y=Y}).
+#      POSITION IN ORDER BUT LAUNCH ALL FIRST — positioning immediately after
+#      each launch races the window mapping and usually hits the wrong window.
+#      Window content should be NEUTRAL, not fallout-repo files (a public
+#      preview shouldn't advertise the project): stdlib python files, ls of a
+#      system dir, /usr/share/doc or $HOME for nautilus.
+#   6. Wait ~4s with the mouse still (cursor hides via step 3), then:
+#        grim <source.png>
+#   7. If the fallout icon theme is already applied, the folders capture amber
+#      (#D9822B-ish); a hover highlight/cursor shows as a localized diff
+#      between two captures 3s apart — recapture if any static region differs.
+#   8. Run THIS script with --source <that grim file>; quantize matches stock
+#      preview look. Restore afterwards: cursor timeout 0, monitor to the
+#      native mode, resurrect the parked window.
 import argparse
-import colorsys
 from pathlib import Path
 
 from PIL import Image
 
 TARGET_W, TARGET_H = 1800, 1012
 
-GREEN_HUE_CENTER = 0.36
-AMBER_HUE_CENTER = 0.08
-HUE_SHIFT = AMBER_HUE_CENTER - GREEN_HUE_CENTER  # -0.28
-SATURATION_BOOST = 1.15
-
-# Per-pixel green predicate — only these get recolored.
-def is_greenish(hue, sat, val):
-    return (
-        sat > 0.10
-        and hue > 0.15
-        and hue < 0.50
-        and val > 0.03
-    )
-
-
-def recolor_pixel(r, g, b):
-    hue, sat, val = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-    if not (is_greenish(hue, sat, val) and g > r):
-        return (r, g, b)
-    new_hue = (hue + HUE_SHIFT) % 1.0
-    new_sat = min(1.0, sat * SATURATION_BOOST)
-    nr, ng, nb = colorsys.hsv_to_rgb(new_hue, new_sat, val)
-    return (round(nr * 255), round(ng * 255), round(nb * 255))
-
 
 def build_preview(source_path, out_path):
     src = Image.open(source_path).convert("RGB")
-    if src.size != (TARGET_W, TARGET_H):
-        raise SystemExit(
-            f"Source must already be {TARGET_W}x{TARGET_H} (matrix's preview.png "
-            f"is); got {src.size}. Re-crop/scale with matrix's recipe first."
-        )
-    px = src.load()
-    out = Image.new("RGB", src.size)
-    opx = out.load()
-    mapped = kept = 0
-    for y in range(TARGET_H):
-        for x in range(TARGET_W):
-            r, g, b = px[x, y]
-            nr, ng, nb = recolor_pixel(r, g, b)
-            if (nr, ng, nb) != (r, g, b):
-                mapped += 1
-            else:
-                kept += 1
-            opx[x, y] = (nr, ng, nb)
-    quant = out.quantize(colors=256, method=Image.Quantize.MAXCOVERAGE)
+    sw, sh = src.size
+    scale = max(TARGET_W / sw, TARGET_H / sh)
+    new_w, new_h = round(sw * scale), round(sh * scale)
+    resized = src.resize((new_w, new_h), Image.LANCZOS)
+    left = (new_w - TARGET_W) // 2
+    top = (new_h - TARGET_H) // 2
+    cropped = resized.crop((left, top, left + TARGET_W, top + TARGET_H))
+    quant = cropped.quantize(colors=256, method=Image.Quantize.MAXCOVERAGE)
     quant.save(out_path, optimize=True)
-    print(f"Wrote {out_path} ({TARGET_W}x{TARGET_H}), recolored {mapped}px, kept {kept}px")
+    print(f"Wrote {out_path} ({TARGET_W}x{TARGET_H})")
 
 
 def main():
@@ -113,8 +107,9 @@ def main():
     )
     p.add_argument(
         "--source",
-        default="~/Work/omarchy-matrix-rain/theme/preview.png",
-        help="Matrix theme preview.png to recolor (default: the matrix repo's)",
+        required=True,
+        help="Raw desktop screenshot (grim capture) to crop/scale/quantize "
+        "(see the RECIPE in this file's header)",
     )
     p.add_argument(
         "--out",
@@ -123,9 +118,9 @@ def main():
     )
     args = p.parse_args()
 
-    source = Path(args.source).expanduser()
+    source = Path(args.source)
     if not source.exists():
-        raise SystemExit(f"Source not found: {source}")
+        raise SystemExit(f"Source screenshot not found: {source}")
     build_preview(source, Path(args.out).expanduser())
 
 
