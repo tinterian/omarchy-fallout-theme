@@ -12,10 +12,8 @@ unmodified on a plain Hyprland/GTK setup.
 
 ## What this actually is
 
-- Two hand-built 4K wallpapers (`Dusk` and `Dust Storm`) — wasteland
-  horizon, a ruined skyline, and a power-armor figure backlit by a hazy
-  sun. Procedurally rendered (see `generate_fallout_wallpaper.py`), not
-  photos or AI-generated images.
+- Four 4K wallpapers from official Fallout artwork — wasteland scenes,
+  power armor, and battle compositions.
 - `theme/colors.toml` — the palette every other themed app pulls from:
   dusty rust-brown darks, warm parchment foreground, `#D9822B` amber
   accent. Every ANSI/terminal color is tinted toward the same wasteland
@@ -87,13 +85,12 @@ omarchy-theme-bg-next
 | File | What it does |
 |---|---|
 | `theme/colors.toml` | Core palette — every other file below derives from this |
-| `theme/backgrounds/*.jpg` | The two wallpapers |
+| `theme/backgrounds/*.jpg` | Four official Fallout wallpapers |
 | `theme/icons.theme` | Points GTK apps (Nautilus) at `BeautyLine-Fallout` |
 | `theme/neovim.lua` | LazyVim colorscheme spec |
 | `theme/vscode.json` | VS Code/VSCodium/Cursor extension + theme name |
 | `theme/unlock.png` | Lock-screen OMARCHY wordmark, recolored |
 | `theme/preview.png` | Theme-switcher thumbnail |
-| `generate_fallout_wallpaper.py` | Regenerates the two wallpapers |
 | `generate_fallout_icons.py` | Regenerates `BeautyLine-Fallout` from an installed `beautyline` |
 
 ## Customizing
